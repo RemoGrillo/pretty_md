@@ -1,5 +1,6 @@
-# Publishes to the VS Code Marketplace (Trusted Publishing, no token) and to Open VSX
-# whenever a tag like v0.1.1 is pushed. Setup: see PUBLISHING.md.
+# Publishes to the VS Code Marketplace (Trusted Publishing, no token) whenever a tag like
+# v0.1.1 is pushed, attaches the .vsix to a GitHub release (for VSCodium users), and also
+# publishes to Open VSX once an OVSX_PAT secret exists. Setup: see PUBLISHING.md.
 name: Publish
 
 on:
@@ -8,12 +9,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # GitHub release with the .vsix
   id-token: write # needed by `vsce publish --oidc`
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      # secrets can't be tested in `if:`; only the yes/no goes in the environment, not the token
+      HAS_OVSX_PAT: ${{ secrets.OVSX_PAT != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,7 +30,15 @@ jobs:
       - run: npx vsce package --out pretty-md.vsix
       - name: Publish to VS Code Marketplace
         run: npx vsce publish --oidc --packagePath pretty-md.vsix
+      - name: Attach the .vsix to a GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          gh release create "$GITHUB_REF_NAME" pretty-md.vsix --title "$GITHUB_REF_NAME" \
+            --notes "Changes: see CHANGELOG.md. VSCodium: download pretty-md.vsix, then Extensions → ⋯ → Install from VSIX…"
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Publish to Open VSX
+        if: env.HAS_OVSX_PAT == 'true'
         run: npx ovsx publish pretty-md.vsix --pat "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}

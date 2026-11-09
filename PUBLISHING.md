@@ -10,7 +10,9 @@ Due registri: **VS Code Marketplace** (VS Code) e **Open VSX** (VSCodium, Cursor
    Microsoft, *Create publisher*. L'ID deve essere quello di `"publisher"` in `package.json`
    (ora `remogrillo`; se scegli un altro ID, cambia `package.json` e la riga
    `getExtension('remogrillo.pretty-md')` in `test/integration/index.ts`). L'ID non si cambia più.
-3. **Open VSX**: entra su https://open-vsx.org con GitHub → crea un account Eclipse
+3. **Open VSX** (facoltativo, per ora saltato: finché manca il secret `OVSX_PAT` la Action
+   salta questo passo e allega il `.vsix` a una release GitHub, da cui si installa in VSCodium):
+   entra su https://open-vsx.org con GitHub → crea un account Eclipse
    (https://accounts.eclipse.org/user/register, stesso username GitHub) → nel profilo
    Open VSX: *Log in with Eclipse* e firma il *Publisher Agreement* → genera un token in
    https://open-vsx.org/user-settings/tokens → crea il namespace:
@@ -30,7 +32,10 @@ Due registri: **VS Code Marketplace** (VS Code) e **Open VSX** (VSCodium, Cursor
    con il token Open VSX.
 3. Per ogni rilascio: aggiorna `CHANGELOG.md`, poi
    `npm version patch` (o `minor`) e `git push --follow-tags`.
-   Il tag `vX.Y.Z` avvia `.github/workflows/publish.yml`, che pubblica su entrambi.
+   Il tag `vX.Y.Z` avvia `.github/workflows/publish.yml`, che pubblica sul Marketplace, crea la
+   release GitHub col `.vsix` e, se c'è il secret `OVSX_PAT`, pubblica anche su Open VSX.
+4. VSCodium non vede il Marketplace: per aggiornare la tua copia,
+   `npm run package && codium --install-extension pretty-md-<versione>.vsix --profile remo`.
 
 I PAT "globali" di Azure DevOps (`vsce login`) vengono ritirati il 1° dicembre 2026:
 non servono, il caricamento web + Trusted Publishing li sostituiscono.
