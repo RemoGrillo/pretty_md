@@ -1,0 +1,32 @@
+# Publishes to the VS Code Marketplace (Trusted Publishing, no token) and to Open VSX
+# whenever a tag like v0.1.1 is pushed. Setup: see PUBLISHING.md.
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # needed by `vsce publish --oidc`
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npx vsce package --out pretty-md.vsix
+      - name: Publish to VS Code Marketplace
+        run: npx vsce publish --oidc --packagePath pretty-md.vsix
+      - name: Publish to Open VSX
+        run: npx ovsx publish pretty-md.vsix --pat "$OVSX_PAT"
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
