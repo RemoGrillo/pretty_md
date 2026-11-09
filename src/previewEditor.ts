@@ -21,6 +21,7 @@ export function readSettings(): Settings {
     theme: THEME_IDS.includes(theme) ? theme : DEFAULT_THEME,
     fontSize: Math.min(32, Math.max(10, Number(c.get('fontSize', 17)) || 17)),
     contentWidth: (['narrow', 'medium', 'wide', 'full'].includes(width) ? width : 'medium') as ContentWidth,
+    slideLevel: Math.min(6, Math.max(1, Math.round(Number(c.get('slideLevel', 3))) || 3)),
     typographer: c.get('typographer', true),
     breaks: c.get('breaks', false),
     scrollSync: c.get('scrollSync', true),
@@ -63,6 +64,11 @@ function uiStrings(): UiStrings {
     editTitle: t('Edit the Markdown source (or double-click any paragraph)'),
     noHeadings: t('No headings'),
     copied: t('Copied'),
+    slides: t('Slides'),
+    slidesTitle: t('Present as slides (← → to move, Esc to exit)'),
+    prevSlide: t('Previous slide'),
+    nextSlide: t('Next slide'),
+    exitSlides: t('Exit slides (Esc)'),
   };
 }
 
@@ -77,6 +83,19 @@ function nonce(): string {
   return out;
 }
 
+const viewSettings = (s: Settings): ViewSettings => ({
+  theme: s.theme,
+  fontSize: s.fontSize,
+  contentWidth: s.contentWidth,
+  slideLevel: s.slideLevel,
+});
+
+export interface SlideState {
+  active: boolean;
+  index: number;
+  count: number;
+}
+
 const dirname = (uri: vscode.Uri): vscode.Uri => uri.with({ path: path.posix.dirname(uri.path) });
 
 type FromWebview =
@@ -85,7 +104,8 @@ type FromWebview =
   | { type: 'setFontSize'; size: number }
   | { type: 'openLink'; href: string }
   | { type: 'editSource'; line?: number }
-  | { type: 'toggleTask'; line: number };
+  | { type: 'toggleTask'; line: number }
+  | ({ type: 'slides' } & SlideState);
 
 export class PrettyPreviewProvider implements vscode.CustomTextEditorProvider {
   static readonly viewType = 'prettyMd.preview';
@@ -95,6 +115,8 @@ export class PrettyPreviewProvider implements vscode.CustomTextEditorProvider {
   private renderer: Renderer = this.makeRenderer();
   /** Fragment to scroll to once a preview for that document is ready (`[x](other.md#part)`). */
   readonly pendingFragments = new Map<string, string>();
+  /** Documents whose preview should switch to slide mode once ready. */
+  readonly pendingSlides = new Set<string>();
   private activePreview: Preview | undefined;
   private readonly activeEmitter = new vscode.EventEmitter<Preview | undefined>();
   /** Fires when the focused pretty.md preview changes (undefined when it is closed). */
@@ -108,6 +130,31 @@ export class PrettyPreviewProvider implements vscode.CustomTextEditorProvider {
     if (this.activePreview === preview) return;
     this.activePreview = preview;
     this.activeEmitter.fire(preview);
+    this.updateSlidesContext();
+  }
+
+  /** `prettyMd.slidesActive` drives the play / stop button in the editor title. */
+  updateSlidesContext(): void {
+    void vscode.commands.executeCommand('setContext', 'prettyMd.slidesActive', Boolean(this.activePreview?.slides.active));
+  }
+
+  /** Turn slide mode on or off for a document, opening its preview first if needed. */
+  async setSlides(uri: vscode.Uri, on: boolean): Promise<void> {
+    const key = uri.toString();
+    const preview = this.findPreview(uri);
+    if (!on) {
+      this.pendingSlides.delete(key);
+      preview?.post({ type: 'stopSlides' });
+      return;
+    }
+    if (preview?.isReady && preview.panel.visible) {
+      preview.panel.reveal(undefined, false);
+      preview.post({ type: 'startSlides' });
+      return;
+    }
+    this.pendingSlides.add(key);
+    if (preview) preview.panel.reveal(undefined, false);
+    else await vscode.commands.executeCommand('vscode.openWith', uri, PrettyPreviewProvider.viewType);
   }
 
   constructor(readonly context: vscode.ExtensionContext) {}
@@ -208,6 +255,8 @@ class Preview {
   private readonly disposables: vscode.Disposable[] = [];
   private timer: ReturnType<typeof setTimeout> | undefined;
   private ready = false;
+  /** As last reported by the webview. */
+  slides: SlideState = { active: false, index: 0, count: 0 };
 
   get isReady(): boolean {
     return this.ready;
@@ -271,7 +320,7 @@ class Preview {
       scriptSrc: webview.asWebviewUri(vscode.Uri.joinPath(ext, 'dist', 'webview.js')).toString(),
       bodyHtml: this.provider.render(this.document),
       init: {
-        settings: { theme: s.theme, fontSize: s.fontSize, contentWidth: s.contentWidth },
+        settings: viewSettings(s),
         themes: localizedThemes(),
         strings: uiStrings(),
       },
@@ -283,8 +332,7 @@ class Preview {
   }
 
   postSettings(): void {
-    const s = this.provider.getSettings();
-    this.post({ type: 'settings', settings: { theme: s.theme, fontSize: s.fontSize, contentWidth: s.contentWidth } });
+    this.post({ type: 'settings', settings: viewSettings(this.provider.getSettings()) });
   }
 
   private scheduleUpdate(): void {
@@ -310,8 +358,13 @@ class Preview {
           this.provider.pendingFragments.delete(key);
           this.post({ type: 'scrollToFragment', fragment });
         }
+        if (this.provider.pendingSlides.delete(key)) this.post({ type: 'startSlides' });
         break;
       }
+      case 'slides':
+        this.slides = { active: m.active, index: m.index, count: m.count };
+        if (this.provider.active === this) this.provider.updateSlidesContext();
+        break;
       case 'setTheme':
         if (THEME_IDS.includes(m.theme)) await updateSetting('theme', m.theme);
         break;

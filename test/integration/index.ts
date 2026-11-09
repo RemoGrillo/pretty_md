@@ -65,6 +65,18 @@ export async function run(): Promise<void> {
   await appearance.handleMessage({ type: 'previewTheme', theme: null });
   log('PASS sidebar: appearance view, contents tree, files tree');
 
+  // 2c. Slide mode: started by command, split at headings, driven by the Contents view.
+  await vscode.commands.executeCommand('prettyMd.startSlides', doc);
+  await waitFor('slide mode on', () => preview.slides.active && preview.slides.count > 0);
+  // title, "Why typography matters", "What you get" (its #### stays inside), after the ---, footnotes
+  assert.strictEqual(preview.slides.count, 5);
+  const whatYouGet = roots[0].children[0].children[0].heading;
+  await vscode.commands.executeCommand('prettyMd.revealHeading', doc, whatYouGet.id, whatYouGet.line);
+  await waitFor('slide of "What you get"', () => preview.slides.index === 2);
+  await vscode.commands.executeCommand('prettyMd.stopSlides', doc);
+  await waitFor('slide mode off', () => !preview.slides.active);
+  log('PASS slides: start, split at headings, jump from Contents, exit');
+
   // 3. Theme / font size settings round-trip without errors.
   await preview.handleMessage({ type: 'setTheme', theme: 'night' });
   assert.strictEqual(vscode.workspace.getConfiguration('prettyMd').get('theme'), 'night');
@@ -102,7 +114,7 @@ export async function run(): Promise<void> {
 
   // 8. Commands are registered.
   const cmds = await vscode.commands.getCommands(true);
-  for (const c of ['prettyMd.openPreview', 'prettyMd.openPreviewToSide', 'prettyMd.editSource', 'prettyMd.selectTheme', 'prettyMd.toggleOpenByDefault']) {
+  for (const c of ['prettyMd.openPreview', 'prettyMd.openPreviewToSide', 'prettyMd.editSource', 'prettyMd.selectTheme', 'prettyMd.toggleOpenByDefault', 'prettyMd.startSlides', 'prettyMd.stopSlides']) {
     assert.ok(cmds.includes(c), c);
   }
   log('PASS commands registered');

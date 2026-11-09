@@ -2,6 +2,7 @@
 import morphdom from 'morphdom';
 import type { PageInit, ViewSettings } from '../template';
 import type { ThemeInfo } from '../themes';
+import { createSlides } from './slides';
 
 interface VsCodeApi {
   postMessage(message: unknown): void;
@@ -13,6 +14,8 @@ declare function acquireVsCodeApi(): VsCodeApi;
 interface State {
   scrollY: number;
   tocOpen: boolean;
+  /** Slide being shown, or null outside slide mode. */
+  slide: number | null;
 }
 
 const vscode: VsCodeApi =
@@ -33,17 +36,39 @@ const tocList = $<HTMLOListElement>('pm-toc-list');
 const tocBtn = $<HTMLButtonElement>('pm-toc-btn');
 
 let settings: ViewSettings = init.settings;
-const state: State = { scrollY: 0, tocOpen: false, ...((vscode.getState() as Partial<State>) ?? {}) };
+const state: State = { scrollY: 0, tocOpen: false, slide: null, ...((vscode.getState() as Partial<State>) ?? {}) };
 const saveState = () => vscode.setState(state);
 
+const slides = createSlides({
+  content,
+  level: () => settings.slideLevel,
+  onChange: (s) => {
+    state.slide = s.active ? s.index : null;
+    saveState();
+    vscode.postMessage({ type: 'slides', ...s });
+  },
+  onExit: (line) => {
+    if (line !== undefined) scrollToLine(line);
+  },
+});
+
 // ---------------------------------------------------------------- settings
+
+let appliedSlideLevel = settings.slideLevel;
 
 function applySettings(s: ViewSettings): void {
   root.dataset.theme = s.theme;
   root.dataset.width = s.contentWidth;
   root.style.setProperty('--pm-font-size', `${s.fontSize}px`);
+  root.style.setProperty('--pm-scale', String(s.fontSize / 17));
   themeName.textContent = themeLabel(s.theme);
   renderThemeMenu();
+  if (s.slideLevel !== appliedSlideLevel) {
+    appliedSlideLevel = s.slideLevel;
+    slides.rebuild();
+  } else {
+    slides.refit();
+  }
 }
 
 const themeLabel = (id: string) => init.themes.find((t) => t.id === id)?.label ?? id;
@@ -129,7 +154,7 @@ themeMenu.addEventListener('keydown', (e) => {
   }
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
+  if (e.key === 'Escape' && !slides.active) {
     if (!themeMenu.hidden) {
       setMenuOpen(false);
       themeBtn.focus();
@@ -154,6 +179,7 @@ $('pm-smaller').addEventListener('click', () => bumpFont(-1));
 $('pm-larger').addEventListener('click', () => bumpFont(1));
 
 $('pm-edit').addEventListener('click', () => vscode.postMessage({ type: 'editSource', line: topVisibleLine() }));
+$('pm-slides-btn').addEventListener('click', () => slides.enter({ line: topVisibleLine() }));
 
 // ------------------------------------------------------- table of contents
 
@@ -275,11 +301,12 @@ document.addEventListener('click', (e) => {
   }
 
   const a = target.closest<HTMLAnchorElement>('a[href]');
-  if (a && (content.contains(a) || toc.contains(a))) {
+  if (a && (content.contains(a) || toc.contains(a) || $('pm-slides').contains(a))) {
     e.preventDefault();
     const href = a.getAttribute('href')!;
     if (href.startsWith('#')) {
-      scrollToFragment(decodeURIComponent(href.slice(1)));
+      const fragment = decodeURIComponent(href.slice(1));
+      if (!slides.active || !slides.goToFragment(fragment)) scrollToFragment(fragment);
       if (toc.contains(a) && window.innerWidth < 1100) setTocOpen(false);
     } else {
       vscode.postMessage({ type: 'openLink', href });
@@ -337,6 +364,7 @@ function updateContent(html: string): void {
     },
   });
   buildToc();
+  slides.rebuild();
 }
 
 window.addEventListener('message', (event: MessageEvent) => {
@@ -353,10 +381,17 @@ window.addEventListener('message', (event: MessageEvent) => {
       root.dataset.theme = (m.theme as string | null) ?? settings.theme;
       break;
     case 'scrollToLine':
-      scrollToLine(m.line as number);
+      if (slides.active) slides.goToLine(m.line as number);
+      else scrollToLine(m.line as number);
       break;
     case 'scrollToFragment':
-      scrollToFragment(m.fragment as string);
+      if (!slides.active || !slides.goToFragment(m.fragment as string)) scrollToFragment(m.fragment as string);
+      break;
+    case 'startSlides':
+      if (!slides.active) slides.enter({ line: topVisibleLine() });
+      break;
+    case 'stopSlides':
+      slides.exit();
       break;
   }
 });
@@ -367,4 +402,8 @@ applySettings(settings);
 buildToc();
 if (state.tocOpen) setTocOpen(true);
 if (state.scrollY) window.scrollTo(0, state.scrollY);
+// Back in slide mode after the tab was hidden and its webview rebuilt (or a sample page asking for it).
+if (init.startSlides !== undefined) slides.enter({ index: init.startSlides, animate: false });
+else if (state.slide !== null) slides.enter({ index: state.slide, animate: false });
+else vscode.postMessage({ type: 'slides', active: false, index: 0, count: 0 });
 vscode.postMessage({ type: 'ready' });

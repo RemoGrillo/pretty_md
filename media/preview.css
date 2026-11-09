@@ -1181,6 +1181,350 @@ html:has(#pm-theme-menu:not([hidden])) #pm-toolbar {
   padding: 5px 8px;
 }
 
+/* ------------------------------------------------------------------- slides */
+
+html.pm-slides-on {
+  overflow: hidden;
+}
+
+html.pm-slides-on #pm-toolbar,
+html.pm-slides-on #pm-theme-menu,
+html.pm-slides-on #pm-toc,
+html.pm-slides-on #content {
+  visibility: hidden;
+}
+
+#pm-slides {
+  /* base size of slide text: grows with the window, scaled by the text size setting */
+  --slide-font: clamp(15px, min(2.05vw, 3.3vh), 46px);
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  outline: none;
+}
+
+/* a faint glow of the theme's accent from above: a stage rather than a page */
+#pm-slides::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(130% 85% at 50% -10%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 62%);
+}
+
+#pm-slides.pm-opening {
+  animation: pm-slides-open 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+#pm-slides.pm-closing {
+  animation: pm-slides-close 0.22s ease-in both;
+  pointer-events: none;
+}
+
+#pm-slides.pm-idle {
+  cursor: none;
+}
+
+#pm-slides.pm-instant * {
+  transition: none !important;
+}
+
+#pm-slide-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.pm-slide {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7vh max(9vw, 76px) 10vh;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.pm-slide.pm-current {
+  z-index: 1;
+  visibility: visible;
+  opacity: 1;
+}
+
+.pm-slide.pm-out-next,
+.pm-slide.pm-out-prev {
+  z-index: 0;
+  visibility: visible;
+  pointer-events: none;
+}
+
+/* still too long at the smallest text size: scroll instead of cutting */
+.pm-slide.pm-slide--scroll {
+  align-items: flex-start;
+  overflow-y: auto;
+}
+
+.pm-slide-inner {
+  box-sizing: border-box;
+  width: min(100%, 38em);
+  font-size: calc(var(--slide-font) * var(--pm-scale, 1) * var(--body-scale) * var(--fit, 1));
+  line-height: var(--leading);
+  text-align: var(--text-align);
+  hyphens: var(--hyphens);
+  overflow-wrap: break-word;
+}
+
+html[data-width='narrow'] .pm-slide-inner { width: min(100%, 32em); }
+html[data-width='wide'] .pm-slide-inner,
+html[data-width='full'] .pm-slide-inner { width: min(100%, 48em); }
+
+.pm-slide-inner > :first-child,
+.pm-slide-kicker + * {
+  margin-top: 0;
+}
+
+.pm-slide-inner > :last-child {
+  margin-bottom: 0;
+}
+
+.pm-slide-inner :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 1.1em;
+}
+
+/* the heading that opens a slide is its title: h2, h3… all read as slide titles */
+.pm-slide-inner .pm-slide-title {
+  margin-top: 0;
+}
+
+.pm-slide-inner :is(h2, h3, h4, h5, h6).pm-slide-title {
+  font-size: var(--h2-size);
+}
+
+.pm-slide-inner img {
+  max-height: 58vh;
+  object-fit: contain;
+}
+
+.pm-slide-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  margin: 0 0 1.2em;
+  font-size: 0.6em;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.pm-slide-kicker::before {
+  content: '';
+  flex: none;
+  width: 2.6em;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.75;
+  transform-origin: left;
+}
+
+/* section dividers and title slides: centred, larger */
+.pm-slide--center .pm-slide-inner,
+.pm-slide--center .pm-slide-inner > :is(h1, h2, h3, h4, h5, h6, p) {
+  text-align: center;
+}
+
+.pm-slide--center .pm-slide-kicker {
+  justify-content: center;
+}
+
+.pm-slide--center .pm-slide-inner :is(h1, h2, h3, h4, h5, h6).pm-slide-title {
+  font-size: calc(var(--h2-size) * 1.3);
+  text-wrap: balance;
+}
+
+.pm-slide--title .pm-slide-inner h1.pm-slide-title {
+  font-size: calc(var(--h1-size) * 1.12);
+}
+
+.pm-slide--center .pm-slide-title::after {
+  margin-inline: auto;
+}
+
+.pm-slide--center .pm-slide-inner > p {
+  font-size: 1.12em;
+  color: var(--muted);
+  text-wrap: balance;
+}
+
+.pm-slide--center .pm-slide-inner > blockquote {
+  display: inline-block;
+  text-align: start;
+}
+
+/* arrows, counter, progress */
+.pm-slide-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-top: -23px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--rule-strong) 70%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  color: var(--muted);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease, transform 0.2s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+#pm-slide-prev { left: 20px; }
+#pm-slide-next { right: 20px; }
+
+.pm-slide-nav:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+#pm-slide-prev:hover { transform: translateX(-2px); }
+#pm-slide-next:hover { transform: translateX(2px); }
+
+.pm-slide-nav:focus-visible,
+#pm-slide-exit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pm-slide-nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#pm-slide-hud {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--f-ui);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  transition: opacity 0.3s ease;
+}
+
+#pm-slide-exit {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+#pm-slide-exit:hover {
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+  color: var(--fg);
+}
+
+#pm-slides.pm-idle .pm-slide-nav,
+#pm-slides.pm-idle #pm-slide-hud {
+  opacity: 0;
+}
+
+#pm-slide-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 3px;
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+#pm-slide-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (max-width: 640px) {
+  .pm-slide { padding: 6vh max(6vw, 56px) 9vh; }
+  .pm-slide-nav { width: 38px; height: 38px; margin-top: -19px; }
+  #pm-slide-prev { left: 10px; }
+  #pm-slide-next { right: 10px; }
+}
+
+/* motion: the slide glides in, then its blocks rise one after the other */
+.pm-slide.pm-in-next { animation: pm-in-next 0.6s 0.05s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pm-slide.pm-in-prev { animation: pm-in-prev 0.6s 0.05s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pm-slide.pm-out-next { animation: pm-out-next 0.26s ease-in both; }
+.pm-slide.pm-out-prev { animation: pm-out-prev 0.26s ease-in both; }
+
+.pm-slide.pm-animate .pm-slide-inner > * {
+  animation: pm-rise 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.2s + var(--i, 0) * 0.07s);
+}
+
+.pm-slide.pm-animate .pm-slide-kicker::before {
+  animation: pm-draw 0.7s 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes pm-slides-open {
+  from { opacity: 0; transform: scale(1.02); }
+}
+
+@keyframes pm-slides-close {
+  to { opacity: 0; transform: scale(0.99); }
+}
+
+@keyframes pm-in-next {
+  from { opacity: 0; transform: translateX(4vw); }
+}
+
+@keyframes pm-in-prev {
+  from { opacity: 0; transform: translateX(-4vw); }
+}
+
+@keyframes pm-out-next {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateX(-3vw); }
+}
+
+@keyframes pm-out-prev {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateX(3vw); }
+}
+
+@keyframes pm-rise {
+  from { opacity: 0; transform: translateY(0.65em); }
+}
+
+@keyframes pm-draw {
+  from { transform: scaleX(0); }
+}
+
 /* --------------------------------------------------------------- scrollbars */
 
 ::-webkit-scrollbar {
@@ -1203,8 +1547,11 @@ html:has(#pm-theme-menu:not([hidden])) #pm-toolbar {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before {
     transition: none !important;
     scroll-behavior: auto !important;
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
   }
 }

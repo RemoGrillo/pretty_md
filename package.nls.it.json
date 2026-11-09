@@ -22,5 +22,14 @@
   "welcome.files": "Nessun file Markdown in questa cartella di lavoro.",
   "cmd.openAsText": "Apri come testo",
   "cmd.refreshFiles": "Aggiorna",
-  "cmd.revealHeading": "Vai al titolo"
+  "cmd.revealHeading": "Vai al titolo",
+  "cmd.startSlides": "Presenta come slide",
+  "cmd.stopSlides": "Esci dalle slide",
+  "config.slideLevel": "Nella modalità slide, i titoli fino a questo livello iniziano una nuova slide; quelli più piccoli restano dentro la slide. Una riga `---` inizia sempre una nuova slide.",
+  "config.slideLevel.1": "Solo i titoli `#`.",
+  "config.slideLevel.2": "`#` e `##`.",
+  "config.slideLevel.3": "`#`, `##` e `###` (consigliato).",
+  "config.slideLevel.4": "Fino a `####`.",
+  "config.slideLevel.5": "Fino a `#####`.",
+  "config.slideLevel.6": "Tutti i titoli."
 }

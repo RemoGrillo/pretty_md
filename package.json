@@ -1,8 +1,8 @@
 {
   "name": "pretty-md",
   "displayName": "pretty.md",
-  "description": "Open Markdown files as a beautifully typeset page first. Switch between reading themes (Classic, Manuscript, Paper, Night…) and jump to the source when you want to edit.",
-  "version": "0.2.0",
+  "description": "Open Markdown files as a beautifully typeset page first. Switch between reading themes (Classic, Manuscript, Paper, Night…), present any document as animated slides, and jump to the source when you want to edit.",
+  "version": "0.3.0",
   "publisher": "remogrillo",
   "author": {
     "name": "Remo Grillo"
@@ -38,7 +38,9 @@
     "theme",
     "serif",
     "sepia",
-    "readme"
+    "readme",
+    "slides",
+    "presentation"
   ],
   "main": "./dist/extension.js",
   "l10n": "./l10n",
@@ -100,6 +102,18 @@
         "icon": "$(symbol-color)"
       },
       {
+        "command": "prettyMd.startSlides",
+        "title": "%cmd.startSlides%",
+        "category": "pretty.md",
+        "icon": "$(play)"
+      },
+      {
+        "command": "prettyMd.stopSlides",
+        "title": "%cmd.stopSlides%",
+        "category": "pretty.md",
+        "icon": "$(debug-stop)"
+      },
+      {
         "command": "prettyMd.toggleOpenByDefault",
         "title": "%cmd.toggleOpenByDefault%",
         "category": "pretty.md"
@@ -125,6 +139,16 @@
     "menus": {
       "editor/title": [
         {
+          "command": "prettyMd.startSlides",
+          "when": "activeCustomEditorId == 'prettyMd.preview' && !prettyMd.slidesActive",
+          "group": "navigation@0"
+        },
+        {
+          "command": "prettyMd.stopSlides",
+          "when": "activeCustomEditorId == 'prettyMd.preview' && prettyMd.slidesActive",
+          "group": "navigation@0"
+        },
+        {
           "command": "prettyMd.openPreview",
           "when": "resourceLangId == markdown && activeEditor == 'workbench.editors.files.textFileEditor'",
           "group": "navigation@-10"
@@ -143,6 +167,11 @@
       "explorer/context": [
         {
           "command": "prettyMd.openPreview",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@99"
+        },
+        {
+          "command": "prettyMd.startSlides",
           "when": "resourceLangId == markdown",
           "group": "navigation@99"
         }
@@ -171,6 +200,14 @@
         {
           "command": "prettyMd.openAsText",
           "when": "activeCustomEditorId == 'prettyMd.preview'"
+        },
+        {
+          "command": "prettyMd.startSlides",
+          "when": "resourceLangId == markdown || activeCustomEditorId == 'prettyMd.preview'"
+        },
+        {
+          "command": "prettyMd.stopSlides",
+          "when": "activeCustomEditorId == 'prettyMd.preview' && prettyMd.slidesActive"
         }
       ],
       "view/title": [
@@ -195,6 +232,11 @@
           "command": "prettyMd.openAsText",
           "when": "view == prettyMd.files && viewItem == prettyMd.file",
           "group": "navigation@2"
+        },
+        {
+          "command": "prettyMd.startSlides",
+          "when": "view == prettyMd.files && viewItem == prettyMd.file",
+          "group": "navigation@3"
         }
       ]
     },
@@ -259,29 +301,51 @@
           "markdownDescription": "%config.contentWidth%",
           "order": 2
         },
+        "prettyMd.slideLevel": {
+          "type": "number",
+          "default": 3,
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "markdownEnumDescriptions": [
+            "%config.slideLevel.1%",
+            "%config.slideLevel.2%",
+            "%config.slideLevel.3%",
+            "%config.slideLevel.4%",
+            "%config.slideLevel.5%",
+            "%config.slideLevel.6%"
+          ],
+          "markdownDescription": "%config.slideLevel%",
+          "order": 3
+        },
         "prettyMd.editSourceBeside": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%config.editSourceBeside%",
-          "order": 3
+          "order": 4
         },
         "prettyMd.scrollSync": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%config.scrollSync%",
-          "order": 4
+          "order": 5
         },
         "prettyMd.typographer": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%config.typographer%",
-          "order": 5
+          "order": 6
         },
         "prettyMd.breaks": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%config.breaks%",
-          "order": 6
+          "order": 7
         }
       }
     },

@@ -76,6 +76,19 @@ export function activate(context: vscode.ExtensionContext): PrettyMdApi {
 
     vscode.commands.registerCommand('prettyMd.selectTheme', () => selectTheme(provider)),
 
+    vscode.commands.registerCommand('prettyMd.startSlides', async (arg?: unknown) => {
+      const target = targetUri(arg);
+      if (!target) {
+        void vscode.window.showInformationMessage(t('Open a Markdown file first.'));
+        return;
+      }
+      await provider.setSlides(target, true);
+    }),
+    vscode.commands.registerCommand('prettyMd.stopSlides', async (arg?: unknown) => {
+      const target = uriFrom(arg) ?? provider.active?.document.uri;
+      if (target) await provider.setSlides(target, false);
+    }),
+
     vscode.commands.registerCommand('prettyMd.toggleOpenByDefault', async () => {
       const enable = !isOpenByDefault();
       await setOpenByDefault(enable);

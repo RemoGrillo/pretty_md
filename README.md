@@ -21,6 +21,10 @@
 
 - **Fonts included.** EB Garamond, Source Sans 3, Inter, Playfair Display and JetBrains Mono ship with the extension, so the page looks the same on every machine. Nothing is downloaded.
 - **Edit in one click.** Press **Edit** on the page (or `Ctrl+Shift+V` / `Cmd+Shift+V`) to open the source beside it. The preview updates as you type and follows your scrolling. **Double-click any paragraph** to jump to that line.
+- **Present it as slides.** Press the play button and the document becomes a deck: every heading down to `###` (you choose the level) and every `---` line starts a new slide. Move with the arrows, the keyboard (`→` `←` `Space` `Home` `End`) or a swipe; `Esc` takes you back to the page, where the slide was. Each slide glides in and its blocks rise one after another, long slides shrink to fit the screen, and they update live while you edit the source beside them.
+
+  ![A slide in the Night theme](images/slides.png)
+
 - **Its own sidebar** (the open-book icon in the Activity Bar):
   - **Appearance**: theme thumbnails (hover to preview, click to apply), text size, column width, and a switch for opening `.md` files in pretty.md;
   - **Contents**: the headings of the document you are reading or editing; click one to jump there, in the page and in the source;
@@ -39,6 +43,7 @@
 | Edit the source | **Edit** button, `Ctrl+Shift+V` on the page, or double-click a paragraph |
 | Go back to the page | Book icon in the editor title bar, or **pretty.md: Open Pretty Preview** |
 | Jump to a section | **Contents** in the sidebar, or the list button in the preview toolbar |
+| Present as slides | Play button in the editor title or the preview toolbar, **pretty.md: Present as Slides**, or right-click a file → **Present as Slides** |
 | Open `.md` files as text by default again | The switch in **Appearance**, or **pretty.md: Toggle Opening Markdown Files in pretty.md by Default** |
 
 You can also right-click a file and choose **Open With… → Text Editor**.
@@ -50,6 +55,7 @@ You can also right-click a file and choose **Open With… → Text Editor**.
 | `prettyMd.theme` | `classic` | Reading theme |
 | `prettyMd.fontSize` | `17` | Base text size in pixels |
 | `prettyMd.contentWidth` | `medium` | `narrow`, `medium`, `wide` or `full` |
+| `prettyMd.slideLevel` | `3` | In slide mode, headings up to this level start a new slide |
 | `prettyMd.editSourceBeside` | `true` | Open the source in a split next to the page |
 | `prettyMd.scrollSync` | `true` | Scroll the page along with the source |
 | `prettyMd.typographer` | `true` | Curly quotes, dashes, ellipses |

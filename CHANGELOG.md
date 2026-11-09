@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-11-09
+
+- **Slides**: present any Markdown file as a deck (play button in the editor title or the preview toolbar,
+  **pretty.md: Present as Slides**, or right-click a file). Headings down to `prettyMd.slideLevel` (default `###`) and
+  `---` lines start new slides.
+  - Arrows on screen, keyboard (`→` `←` `Space` `Page Up/Down` `Home` `End`, `Esc` to leave) and swipe.
+  - Slides glide in and their blocks rise one after another; nothing moves with *reduce motion* turned on.
+  - Title and section slides are centred; slides under a section show its name above the title.
+  - Long slides shrink to fit the screen, then scroll. Live updates while you edit; **Contents** jumps to the right slide.
+
 ## 0.2.0 — 2026-11-09
 
 - pretty.md sidebar (open book icon in the Activity Bar):

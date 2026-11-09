@@ -22,5 +22,14 @@
   "welcome.files": "No Markdown files in this workspace.",
   "cmd.openAsText": "Open as Text",
   "cmd.refreshFiles": "Refresh",
-  "cmd.revealHeading": "Go to Heading"
+  "cmd.revealHeading": "Go to Heading",
+  "cmd.startSlides": "Present as Slides",
+  "cmd.stopSlides": "Exit Slides",
+  "config.slideLevel": "In slide mode, headings up to this level start a new slide. Deeper headings stay inside the slide. A `---` line always starts a new slide.",
+  "config.slideLevel.1": "Only `#` headings.",
+  "config.slideLevel.2": "`#` and `##`.",
+  "config.slideLevel.3": "`#`, `##` and `###` (recommended).",
+  "config.slideLevel.4": "Down to `####`.",
+  "config.slideLevel.5": "Down to `#####`.",
+  "config.slideLevel.6": "Every heading."
 }

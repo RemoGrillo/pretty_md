@@ -88,12 +88,14 @@ test('page shell escapes init JSON and carries the CSP nonce', () => {
     scriptSrc: 'w.js',
     bodyHtml: '<p>x</p>',
     init: {
-      settings: { theme: 'classic', fontSize: 17, contentWidth: 'medium' },
+      settings: { theme: 'classic', fontSize: 17, contentWidth: 'medium', slideLevel: 3 },
       themes: THEMES,
       strings: { ...DEFAULT_UI_STRINGS, contents: '</script><script>alert(1)</script>' },
     },
   });
   assert.match(page, /script-src 'nonce-abc'/);
+  assert.match(page, /id="pm-slides-btn"/);
+  assert.match(page, /<div id="pm-slides"[^>]* hidden>/);
   assert.match(page, /<script nonce="abc" src="w.js">/);
   const json = page.match(/<script id="pm-init" type="application\/json">([\s\S]*?)<\/script>/)![1];
   assert.equal(JSON.parse(json).strings.contents, '</script><script>alert(1)</script>');

@@ -35,5 +35,10 @@
   "Wide": "Larga",
   "Full": "Piena",
   "Open Markdown files in pretty.md": "Apri i file Markdown in pretty.md",
-  "All settings…": "Tutte le impostazioni…"
+  "All settings…": "Tutte le impostazioni…",
+  "Slides": "Slide",
+  "Present as slides (← → to move, Esc to exit)": "Presenta come slide (← → per spostarti, Esc per uscire)",
+  "Previous slide": "Slide precedente",
+  "Next slide": "Slide successiva",
+  "Exit slides (Esc)": "Esci dalle slide (Esc)"
 }
