@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Slides open more smoothly: the page dissolves under the first slide instead of disappearing at once.
+- README: why pretty.md exists, badges, animated demos, install instructions for VSCodium.
+
 ## 0.3.0 — 2026-11-09
 
 - **Slides**: present any Markdown file as a deck (play button in the editor title or the preview toolbar,

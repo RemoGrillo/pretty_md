@@ -1,8 +1,19 @@
 # pretty.md
 
-**Read your Markdown like a book.** pretty.md opens `.md` files as a beautifully typeset page — generous margins, a comfortable line length, real serif and sans fonts — and puts the source one click away when you want to edit.
+[![VS Marketplace](https://vsmarketplacebadges.dev/version-short/remogrillo.pretty-md.svg)](https://marketplace.visualstudio.com/items?itemName=remogrillo.pretty-md)
+[![VSCodium: .vsix on GitHub](https://img.shields.io/badge/VSCodium-.vsix_on_GitHub-2f80ed?logo=vscodium&logoColor=white)](https://github.com/RemoGrillo/pretty_md/releases/latest)
+[![Publish](https://github.com/RemoGrillo/pretty_md/actions/workflows/publish.yml/badge.svg)](https://github.com/RemoGrillo/pretty_md/actions/workflows/publish.yml)
+[![License: MIT](https://img.shields.io/github/license/RemoGrillo/pretty_md)](LICENSE)
 
-![The Classic theme](images/screenshot-classic.png)
+**Read your Markdown like a book, and present it like a deck.** pretty.md opens `.md` files as a beautifully typeset page — generous margins, a comfortable line length, real serif and sans fonts — puts the source one click away when you want to edit, and turns any of them into slides.
+
+![The same page in each of the seven themes](images/themes.gif)
+
+## Why
+
+Agentic coding has turned Markdown into the main thing we read. Claude Code, Codex, Cursor and friends write plans, specs, design notes, `CLAUDE.md` and `AGENTS.md`, READMEs, review reports and changelogs — page after page of it, usually opened as raw source in an editor tab: no margins, 140-character lines, `**` and `|---|` everywhere.
+
+pretty.md is for that reading. It makes the documents your agents (and your colleagues) produce **pleasant to read** — opened as a typeset page by default, with the source one click away — and lets you **present any of them as slides**, so the plan your agent just wrote can go straight on the screen in a meeting, with no new syntax to learn.
 
 ## Features
 
@@ -23,7 +34,7 @@
 - **Edit in one click.** Press **Edit** on the page (or `Ctrl+Shift+V` / `Cmd+Shift+V`) to open the source beside it. The preview updates as you type and follows your scrolling. **Double-click any paragraph** to jump to that line.
 - **Present it as slides.** Press the play button and the document becomes a deck: every heading down to `###` (you choose the level) and every `---` line starts a new slide. Move with the arrows, the keyboard (`→` `←` `Space` `Home` `End`) or a swipe; `Esc` takes you back to the page, where the slide was. Each slide glides in and its blocks rise one after another, long slides shrink to fit the screen, and they update live while you edit the source beside them.
 
-  ![A slide in the Night theme](images/slides.png)
+  ![A Markdown page turning into animated slides](images/slides.gif)
 
 - **Its own sidebar** (the open-book icon in the Activity Bar):
   - **Appearance**: theme thumbnails (hover to preview, click to apply), text size, column width, and a switch for opening `.md` files in pretty.md;
@@ -32,7 +43,12 @@
 - **Reading comforts:** a table of contents that tracks where you are, text size buttons, a toolbar that hides while you scroll, and find (`Ctrl+F`).
 - **Everything you write in Markdown:** syntax-highlighted code with a copy button, tables, footnotes, task lists you can tick right on the page, GitHub alerts (`> [!NOTE]`, `> [!WARNING]`…), YAML front matter, relative images and links to other Markdown files.
 
-![All themes](images/themes.png)
+![All themes side by side](images/themes.png)
+
+## Install
+
+- **VS Code:** search for **pretty.md** in the Extensions view, or install it from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=remogrillo.pretty-md).
+- **VSCodium and other editors without the Marketplace:** download `pretty-md.vsix` from the [latest release](https://github.com/RemoGrillo/pretty_md/releases/latest), then *Extensions → ⋯ → Install from VSIX…* (or `codium --install-extension pretty-md.vsix`).
 
 ## Usage
 

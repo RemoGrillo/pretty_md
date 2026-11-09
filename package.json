@@ -40,7 +40,12 @@
     "sepia",
     "readme",
     "slides",
-    "presentation"
+    "presentation",
+    "claude code",
+    "agentic coding",
+    "ai",
+    "documentation",
+    "docs"
   ],
   "main": "./dist/extension.js",
   "l10n": "./l10n",

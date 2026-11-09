@@ -1187,10 +1187,10 @@ html.pm-slides-on {
   overflow: hidden;
 }
 
-html.pm-slides-on #pm-toolbar,
-html.pm-slides-on #pm-theme-menu,
-html.pm-slides-on #pm-toc,
-html.pm-slides-on #content {
+html.pm-slides-covered #pm-toolbar,
+html.pm-slides-covered #pm-theme-menu,
+html.pm-slides-covered #pm-toc,
+html.pm-slides-covered #content {
   visibility: hidden;
 }
 

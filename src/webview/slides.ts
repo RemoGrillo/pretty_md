@@ -72,6 +72,14 @@ export function createSlides(o: SlidesOptions): Slides {
   let closeTimer: ReturnType<typeof setTimeout> | undefined;
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
 
+  // The page stays visible under the slides while they fade in, then it is hidden (find, focus).
+  const cover = () => root.classList.add('pm-slides-covered');
+  const onOpened = (e: AnimationEvent) => {
+    if (e.target !== host) return;
+    host.removeEventListener('animationend', onOpened);
+    if (active) cover();
+  };
+
   const state = (): SlideState => ({ active, index: Math.max(0, index), count: slides.length });
   const animations = () => !reducedMotion.matches;
 
@@ -285,12 +293,16 @@ export function createSlides(o: SlidesOptions): Slides {
     requestAnimationFrame(() => requestAnimationFrame(() => host.classList.remove('pm-instant')));
     const start = at.index ?? (at.line !== undefined ? indexForLine(at.line) : 0);
     show(start, false);
+    host.removeEventListener('animationend', onOpened);
     if (at.animate !== false && animations()) {
       void host.offsetWidth;
+      host.addEventListener('animationend', onOpened);
       host.classList.add('pm-opening');
       slides[index].el.classList.add('pm-animate');
       animating.add(slides[index].el);
       cleanupTimer = setTimeout(clearAnimations, 1800);
+    } else {
+      cover();
     }
     host.focus({ preventScroll: true });
     wake();
@@ -301,7 +313,8 @@ export function createSlides(o: SlidesOptions): Slides {
     const line = slides[index]?.line;
     active = false;
     clearAnimations();
-    root.classList.remove('pm-slides-on');
+    host.removeEventListener('animationend', onOpened);
+    root.classList.remove('pm-slides-on', 'pm-slides-covered');
     o.onExit(Number.isNaN(line) ? undefined : line);
     const done = () => {
       host.hidden = true;
